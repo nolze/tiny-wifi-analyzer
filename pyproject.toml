@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "tiny-wifi-analyzer"
+version = "0.1.0"
+description = "A tiny wifi anilyzer for macOS"
+authors = ["nolze <nolze@archlinux.us>"]
+license = "Apache-2.0"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pywebview = "^3.3.5"
+pyobjc-framework-CoreWLAN = "^6.2.2"
+
+[tool.poetry.dev-dependencies]
+pyinstaller = "^4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <title>wifi-analyzer</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      padding-top: 20px;
+      padding-bottom: 10px;
+      padding-left: 10px;
+      padding-right: 20px;
+    }
+
+    .chart {
+      width: 100%;
+    }
+
+    .annotation {
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: flex; flex-wrap: wrap;">
+    <div class="chart" id="chart24"></div>
+    <div class="chart" id="chart5"></div>
+  </div>
+  <script>
+    const CHANNEL_NUMBER_MAX_24 = 16;
+    const CHANNEL_NUMBER_MAX_5 = 170;
+
+    function makeOptions(bandName, channels) {
+      const options = {
+        series: [],
+        chart: {
+          type: 'area',
+          zoom: {
+            enabled: false
+          },
+          animations: {
+            enabled: false,
+          }
+        },
+        plotOptions: {
+          area: {
+            fillTo: 'end',
+          },
+        },
+        stroke: {
+          curve: 'smooth'
+        },
+        legend: {
+          showForSingleSeries: true,
+          position: 'left',
+          onItemClick: {
+            toggleDataSeries: false,
+          },
+          formatter: (seriesName, { seriesIndex, w }) => {
+            const yValue = w.config.series[seriesIndex].data[1][1];
+            const xValue = w.config.series[seriesIndex].data[1][0];
+            return [`Channel: ${xValue} RSSI: ${yValue}dBm`, "<br>", `<b>${seriesName}</b>`]
+          }
+        },
+        xaxis: {
+          type: 'category',
+          categories: channels,
+          min: channels[0],
+          max: channels[channels.length - 1],
+          tickAmount: Math.min(channels.length - 1, 15),
+          tickPlacement: 'on',
+          labels: {
+            rotate: false,
+            hideOverlappingLabels: true,
+          },
+          title: {
+            text: 'channel',
+          },
+          tooltip: {
+            enabled: false,
+          },
+          crosshairs: {
+            show: false,
+          },
+        },
+        yaxis: {
+          type: 'numeric',
+          min: -100,
+          max: 0,
+          title: {
+            text: 'dBm'
+          },
+          tooltip: {
+            enabled: false,
+          }
+        },
+        grid: {
+          xaxis: {
+            lines: {
+              show: true,
+            },
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: (val, { seriesIndex, dataPointIndex, w }) => {
+            if (val === -100) return '';
+            const name = w.config.series[seriesIndex].name;
+            const ch = w.config.series[seriesIndex].data[1][0];
+            return `${ch} ${name}`;
+          },
+        },
+        markers: {
+          size: 0,
+        },
+        tooltip: {
+          enabled: false,
+          shared: false,
+          intersect: false,
+          // custom: () => '',
+          marker: {
+            show: false,
+          },
+          onDatasetHover: {
+            highlightDataSeries: true,
+          },
+          x: {
+            formatter: (value, { series, seriesIndex, dataPointIndex, w }) => {
+              return series[seriesIndex][1];
+            }
+          },
+          y: {
+            formatter: (value, { series, seriesIndex, dataPointIndex, w }) => {
+              return series[seriesIndex][1];
+            }
+          }
+          // items: {
+          //   display: 'none',
+          // },
+        },
+        title: {
+          text: bandName,
+        },
+      };
+      return options;
+    }
+
+    const options24 = makeOptions("2.4GHz", [...Array(CHANNEL_NUMBER_MAX_24).keys()].map((v) => v + 1));
+    const chart24 = new ApexCharts(document.querySelector("#chart24"), options24);
+    chart24.render();
+
+    const options5 = makeOptions("5GHz", [...Array(CHANNEL_NUMBER_MAX_5).keys()].map((v) => v + 1));
+    const chart5 = new ApexCharts(document.querySelector("#chart5"), options5);
+    chart5.render();
+  </script>
+</body>
+
+</html>

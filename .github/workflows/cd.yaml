@@ -1,0 +1,46 @@
+name: CD
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.9]
+        poetry-version: [1.1.2]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run image
+        uses: abatilo/actions-poetry@v2.0.0
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
+      - name: Install deps
+        run: poetry install
+      - name: Set version
+        run: echo "APP_VERSION=$(poetry version --short)" >> $GITHUB_ENV
+      - name: Build
+        run: make build
+      - name: Package app
+        run: |
+          mkdir build/volume
+          cp -R 'build/dist/Tiny Wi-Fi Analyzer.app' build/volume
+          hdiutil create \
+                  -fs HFS+ \
+                  -srcfolder "build/volume" \
+                  -volname "Tiny Wi-Fi Analyzer" "build/Tiny_Wi-Fi_Analyzer.dmg"
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          draft: true
+          name: Release v${{ env.APP_VERSION }}
+          files: build/Tiny_Wi-Fi_Analyzer.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
