@@ -1,20 +1,24 @@
 # Tiny Wi-Fi Analyzer
 
+[![CD](https://github.com/nolze/tiny-wifi-analyzer/workflows/CD/badge.svg)](https://github.com/nolze/tiny-wifi-analyzer/actions?query=workflow%3ACD)
+
 A ***tiny*** Wi-Fi channels & strengths analyzer for macOS.
+Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 ![screenshot](assets/screenshot.png)
 
 ## Requirements
 
-* macOS 10.15 (Catalina) or later
+* macOS 10.15 (Catalina) or later (may work in 10.14 or earlier)
 
 ## Download
 
-...
+* [Visit the latest release](https://github.com/nolze/tiny-wifi-analyzer/releases/latest/)
 
 ## Todo
 
 * [ ] Bundle scripts with Parcel
+* [ ] Prepare GitHub Pages
 
 ## License
 
