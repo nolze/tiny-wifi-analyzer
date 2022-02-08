@@ -5,11 +5,12 @@ block_cipher = None
 
 a = Analysis(
     ["tiny_wifi_analyzer/__main__.py"],
-    pathex=["./tiny-wifi-analyzer"],
+    pathex=["./tiny_wifi_analyzer"],
     binaries=[],
     datas=[("tiny_wifi_analyzer/view", "tiny-wifi-analyzer/view")],
-    hiddenimports=[],
+    hiddenimports=["objc._objc", "objc.super"],
     hookspath=[],
+    hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     win_no_prefer_redirects=False,
@@ -33,6 +34,10 @@ exe = EXE(
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
+    disable_windowed_traceback=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
 )
 app = BUNDLE(
     exe,
@@ -42,8 +47,8 @@ app = BUNDLE(
     info_plist={
         "NSPrincipalClass": "NSApplication",
         "NSAppleScriptEnabled": False,
-        "CFBundleShortVersionString": "0.1.0",
-        "CFBundleVersion": "0.1.0",
+        "CFBundleShortVersionString": "0.1.1",
+        "CFBundleVersion": "0.1.1",
         "NSHighResolutionCapable": True,
     },
 )

@@ -5,6 +5,9 @@ import queue
 import threading
 from time import sleep
 
+# NOTE: https://github.com/r0x0r/pywebview/issues/496
+from objc import super, nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
+
 import CoreWLAN
 import webview
 
