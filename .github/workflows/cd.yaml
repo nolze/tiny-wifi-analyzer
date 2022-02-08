@@ -10,17 +10,19 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [3.9]
-        poetry-version: [1.1.2]
-    runs-on: macos-latest
+        poetry-version: [1.1.11]
+    runs-on: macos-10.15
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
       - name: Run image
-        uses: abatilo/actions-poetry@v2.0.0
+        uses: abatilo/actions-poetry@v2.1.4
         with:
           poetry-version: ${{ matrix.poetry-version }}
+      - name: Config
+        run: poetry config virtualenvs.create false --local
       - name: Install deps
         run: poetry install
       - name: Set version
