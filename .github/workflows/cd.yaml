@@ -9,9 +9,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.9]
-        poetry-version: [1.1.11]
-    runs-on: macos-10.15
+        # NOTE: https://github.com/actions/python-versions#building-installation-packages
+        # For Python >= 3.11, the official macOS universal2 Python binaries are simply downloaded from python.org and...
+        python-version: [3.11]
+        poetry-version: [1.5.1]
+    runs-on:  macos-12
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2

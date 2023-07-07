@@ -134,8 +134,9 @@ def on_closing():
 
 
 def main():
-    window = webview.create_window("Tiny Wi-Fi Analyzer", "./tiny-wifi-analyzer/view/index.html")
-    window.closing += on_closing
+    index_html = os.path.join(os.path.dirname(__file__), 'view/index.html')
+    window = webview.create_window("Tiny Wi-Fi Analyzer", index_html)
+    window.events.closing += on_closing
     webview.start(startup, window, debug=True)
 
 
