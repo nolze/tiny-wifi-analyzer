@@ -48,8 +48,8 @@ app = BUNDLE(
     info_plist={
         "NSPrincipalClass": "NSApplication",
         "NSAppleScriptEnabled": False,
-        "CFBundleShortVersionString": "0.2.0rc1",
-        "CFBundleVersion": "0.2.0rc1",
+        "CFBundleShortVersionString": "0.2.0",
+        "CFBundleVersion": "0.2.0",
         "NSHighResolutionCapable": True,
     },
 )
