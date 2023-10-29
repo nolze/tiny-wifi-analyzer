@@ -6,12 +6,12 @@ authors = ["nolze <nolze@int3.net>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.7"
+python = "<3.12,>=3.8"
 pywebview = "~3.7"
-pyobjc-core = "~9.2"
-pyobjc-framework-cocoa = "~9.2"
-pyobjc-framework-CoreWLAN = "~9.2"
-pyobjc-framework-WebKit = "~9.2"
+pyobjc-core = "~10.0"
+pyobjc-framework-cocoa = "~10.0"
+pyobjc-framework-CoreWLAN = "~10.0"
+pyobjc-framework-WebKit = "~10.0"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^5.13"
