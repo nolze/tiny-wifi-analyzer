@@ -2,12 +2,20 @@ import json
 import logging
 import os.path
 import queue
+import stat
 import threading
 from time import sleep
 
 # NOTE: https://github.com/r0x0r/pywebview/issues/496
-from objc import super, nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
+from objc import (
+    super,
+    nil,
+    registerMetaDataForSelector,
+)  # pylint: disable=unused-import # noqa F401
 
+import AppKit
+import Foundation
+import CoreLocation
 import CoreWLAN
 import webview
 
@@ -32,8 +40,10 @@ class PyChannel:
         self.channel_width = channel.channelWidth()
 
     def __repr__(self):
-        return "<CWChannel> [channel_band={}, channel_number={}, channel_width={}]".format(
-            self.channel_band, self.channel_number, self.channel_width
+        return (
+            "<CWChannel> [channel_band={}, channel_number={}, channel_width={}]".format(
+                self.channel_band, self.channel_number, self.channel_width
+            )
         )
 
 
@@ -133,8 +143,59 @@ def on_closing():
     is_closing = True
 
 
+class LocationManagerDelegate(AppKit.NSObject):
+    def locationManagerDidChangeAuthorization_(self, manager):
+        status = manager.authorizationStatus()
+        if status in [
+            CoreLocation.kCLAuthorizationStatusDenied,
+            CoreLocation.kCLAuthorizationStatusNotDetermined,
+        ]:
+            self.show_dialog()
+
+    def show_dialog(self):
+        alert = AppKit.NSAlert.alloc().init()
+        alert.setMessageText_(f"Location Services are disabled")
+        alert.setInformativeText_(
+            "On macOS 14 Sonoma and Later, Location Services permission is required to get Wi-Fi SSIDs.\n"
+            + "Please enable Location Services in System Preferences > Security & Privacy > Privacy > Location Services."
+        )
+        alert.addButtonWithTitle_("Open Preferences")
+        alert.addButtonWithTitle_("OK")
+        response = alert.runModal()
+        if response == AppKit.NSAlertFirstButtonReturn:
+            AppKit.NSWorkspace.sharedWorkspace().openURL_(
+                Foundation.NSURL.URLWithString_(
+                    "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices"
+                )
+            )
+        AppKit.NSApplication.sharedApplication().terminate_(None)
+
+
+def request_location_permission():
+    location_manager = CoreLocation.CLLocationManager.alloc().init().retain()
+    delegate = LocationManagerDelegate.alloc().init().retain()
+    location_manager.setDelegate_(delegate)
+    # location_manager.delegate()
+    # location_manager.startUpdatingLocation()
+    location_manager.requestWhenInUseAuthorization()
+    for i in range(100):
+        status = location_manager.authorizationStatus()
+        if not status == 0:
+            break
+        sleep(0.01)
+
+
 def main():
-    index_html = os.path.join(os.path.dirname(__file__), 'view/index.html')
+    # NOTE: Sonoma (macOS 11) and later requires location permission to read Wi-Fi SSIDs.
+    os_version = AppKit.NSAppKitVersionNumber
+    # print(os_version, AppKit.NSAppKitVersionNumber13_1)
+    if os_version > AppKit.NSAppKitVersionNumber13_1:
+        request_location_permission()
+
+    # Bring the app to the foreground
+    AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
+
+    index_html = os.path.join(os.path.dirname(__file__), "view/index.html")
     window = webview.create_window("Tiny Wi-Fi Analyzer", index_html)
     window.events.closing += on_closing
     webview.start(startup, window, debug=True)

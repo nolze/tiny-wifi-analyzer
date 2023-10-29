@@ -226,6 +226,23 @@ files = [
 pyobjc-core = ">=10.0"
 
 [[package]]
+name = "pyobjc-framework-corelocation"
+version = "10.0"
+description = "Wrappers for the framework CoreLocation on macOS"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pyobjc-framework-CoreLocation-10.0.tar.gz", hash = "sha256:d84001ab5ef58441514bd92ed9b2fd4225faf0241d2a09ab503592fbc6a6066d"},
+    {file = "pyobjc_framework_CoreLocation-10.0-cp36-abi3-macosx_10_9_universal2.whl", hash = "sha256:0a9d535f00a0369d493f49bd898e68d5ce7227ce161a3f0df0d9e6668e396a77"},
+    {file = "pyobjc_framework_CoreLocation-10.0-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:cf39e4f092d7a94a8ad516bda2603872fd0952aeac0bb0143e7ec2e2244a172d"},
+    {file = "pyobjc_framework_CoreLocation-10.0-cp36-abi3-macosx_11_0_universal2.whl", hash = "sha256:4ec1c23b92285f7f33bdc86dc4e6cbccb8788ceca6ea6205f420859ed172abee"},
+]
+
+[package.dependencies]
+pyobjc-core = ">=10.0"
+pyobjc-framework-Cocoa = ">=10.0"
+
+[[package]]
 name = "pyobjc-framework-corewlan"
 version = "10.0"
 description = "Wrappers for the framework CoreWLAN on macOS"
@@ -346,4 +363,4 @@ testing-integration = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "jar
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.12,>=3.8"
-content-hash = "4f5458b44532f0ef0225ff1ed15a097385e29849982eb69abf949d15a0eb3c4a"
+content-hash = "7d9f24176b3d22761553bc67f235f2d4109583a0c7c6e1ae57d3ac5b1bb7b13d"

@@ -51,5 +51,6 @@ app = BUNDLE(
         "CFBundleShortVersionString": "0.2.0",
         "CFBundleVersion": "0.2.0",
         "NSHighResolutionCapable": True,
+        "NSLocationWhenInUseUsageDescription": "On macOS 14 Sonoma and Later, Location Services permission is required to get Wi-Fi SSIDs.",
     },
 )
