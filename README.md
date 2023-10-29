@@ -18,7 +18,7 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 ## Todo
 
 * [ ] Bundle scripts with Parcel
-* [ ] Prepare GitHub Pages
+* [x] Prepare GitHub Pages
 
 ## License
 
