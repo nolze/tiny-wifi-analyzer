@@ -1,3 +1,5 @@
+/_working/
+
 .venv/
 __pycache__/
 /dist/
