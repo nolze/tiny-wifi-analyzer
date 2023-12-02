@@ -15,10 +15,15 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 * [Visit the latest release](https://github.com/nolze/tiny-wifi-analyzer/releases/latest/)
 
-## Todo
+## Todos
 
 * [ ] Bundle scripts with Parcel
 * [x] Prepare GitHub Pages
+
+## Mentions
+
+- [Bezplatné macOS aplikace, které stojí za pozornost [Free macOS apps worth paying attention to] – Jablíčkář.cz](https://jablickar.cz/bezplatne-macos-aplikace-ktere-stoji-za-pozornost-stredove-tlacitko-prepinani-aplikaci-a-virtualizace/4/)
+- [What are your favourite open-source apps? : r/macapps](https://www.reddit.com/r/macapps/comments/140bl4x/comment/jmx1o5g/)
 
 ## License
 
