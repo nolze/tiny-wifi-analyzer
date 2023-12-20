@@ -1,8 +1,9 @@
 # Tiny Wi-Fi Analyzer
 
 [![CD](https://github.com/nolze/tiny-wifi-analyzer/workflows/CD/badge.svg)](https://github.com/nolze/tiny-wifi-analyzer/actions?query=workflow%3ACD)
+<a href="https://www.buymeacoffee.com/nolze" title="Donate to this project using Buy Me A Coffee"><img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate-orange.svg" alt="Buy Me A Coffee donate button" /></a>
 
-A ***tiny*** Wi-Fi channels & strengths analyzer for macOS.
+Simple, open-source Wi-Fi channel and strength analyzer for macOS.
 Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 ![screenshot](assets/screenshot.png)
@@ -13,7 +14,16 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 ## Download
 
-* [Visit the latest release](https://github.com/nolze/tiny-wifi-analyzer/releases/latest/)
+[Visit the latest release](https://github.com/nolze/tiny-wifi-analyzer/releases/latest/)
+
+### Important note
+
+Since the app is not signed, you need to follow the steps below to run it.
+
+1. **Right-click on the app icon**,
+2. select "Open" from the context menu, and
+3. select "OK" in the dialog below.\
+   <img src="https://user-images.githubusercontent.com/291323/179491872-3a9e6c4c-b8cb-4081-ac88-bd1817d6ba4d.png" width="300px">
 
 ## Todos
 
