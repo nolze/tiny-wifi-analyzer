@@ -2,22 +2,17 @@ import json
 import logging
 import os.path
 import queue
-import stat
 import threading
 from time import sleep
 
-# NOTE: https://github.com/r0x0r/pywebview/issues/496
-from objc import (
-    super,
-    nil,
-    registerMetaDataForSelector,
-)  # pylint: disable=unused-import # noqa F401
-
 import AppKit
-import Foundation
 import CoreLocation
 import CoreWLAN
+import Foundation
 import webview
+
+# NOTE: https://github.com/r0x0r/pywebview/issues/496
+from objc import nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -122,7 +117,7 @@ def update(window, thread=None):
     except queue.Empty:
         if thread is None or not thread.is_alive():
             thread = threading.Thread(target=worker_wait)
-            thread.setDaemon(True)
+            thread.daemon = True
             thread.start()
             debug_scan_count += 1
 
@@ -154,7 +149,7 @@ class LocationManagerDelegate(AppKit.NSObject):
 
     def show_dialog(self):
         alert = AppKit.NSAlert.alloc().init()
-        alert.setMessageText_(f"Location Services are disabled")
+        alert.setMessageText_("Location Services are disabled")
         alert.setInformativeText_(
             "On macOS 14 Sonoma and Later, Location Services permission is required to get Wi-Fi SSIDs.\n"
             + "Please enable Location Services in System Preferences > Security & Privacy > Privacy > Location Services."
