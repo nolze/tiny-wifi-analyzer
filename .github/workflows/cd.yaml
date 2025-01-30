@@ -11,16 +11,16 @@ jobs:
       matrix:
         # NOTE: https://github.com/actions/python-versions#building-installation-packages
         # For Python >= 3.11, the official macOS universal2 Python binaries are simply downloaded from python.org and...
-        python-version: [3.11]
-        poetry-version: [1.5.1]
-    runs-on:  macos-12
+        python-version: ["3.12"]
+        poetry-version: ["2.0.1"]
+    runs-on:  macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Run image
-        uses: abatilo/actions-poetry@v2.1.4
+        uses: abatilo/actions-poetry@v2.4.0
         with:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Config
