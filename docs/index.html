@@ -1,43 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tiny Wi-Fi Analyzer</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<body class="bg-white text-gray-800 font-sans antialiased">
-    <div class="min-h-screen flex flex-col justify-center items-center px-8 md:px-16 py-16">
-        <!-- Main Content -->
-        <div class="max-w-6xl flex flex-wrap md:flex-nowrap items-center space-x-0 md:space-x-12">
-            <!-- Text Content -->
-            <div class="w-full md:w-1/2 mb-8 md:mb-0">
-                <h1 class="text-4xl font-semibold mb-4">Tiny Wi-Fi Analyzer</h1>
-                <h2 class="text-2xl font-light mb-8">
-                    A handy tool for Wi-Fi analysis on macOS.
-                </h2>
-                <div class="flex space-x-4">
-                    <a href="https://github.com/nolze/tiny-wifi-analyzer/releases/latest/download/Tiny_Wi-Fi_Analyzer.dmg"
-                        class="bg-blue-700 text-white font-bold px-5 py-2 rounded-full hover:bg-blue-600 transition-all duration-300">Download
-                        Now</a>
-                    <a href="https://github.com/nolze/tiny-wifi-analyzer"
-                        class="bg-gray-600 text-white font-bold px-5 py-2 rounded-full hover:bg-gray-500 transition-all duration-300">GitHub</a>
-                </div>
-            </div>
-
-            <!-- Image -->
-            <div class="flex-shrink-0 w-full md:w-1/2">
-                <img src="./assets/screenshot.png" alt="App screenshot" class="rounded-lg" />
-            </div>
+  <body class="bg-white text-gray-800 font-sans antialiased">
+    <div
+      class="min-h-screen flex flex-col justify-center items-center px-8 md:px-16 py-16"
+    >
+      <!-- Main Content -->
+      <div
+        class="max-w-6xl flex flex-wrap md:flex-nowrap items-center space-x-0 md:space-x-12"
+      >
+        <!-- Text Content -->
+        <div class="w-full md:w-1/2 mb-8 md:mb-4 flex flex-col items-center">
+          <img src="./assets/twa.svg" width="80" height="80" class="pb-6" />
+          <h1 class="text-4xl font-semibold mb-4">Tiny Wi-Fi Analyzer</h1>
+          <h2 class="text-2xl font-light mb-8 text-center">
+            Simple, open-source Wi-Fi channel and strength analyzer for macOS.
+          </h2>
+          <div class="flex space-x-4">
+            <a
+              href="https://github.com/nolze/tiny-wifi-analyzer/releases/latest/download/Tiny_Wi-Fi_Analyzer.dmg"
+              class="bg-blue-700 text-white font-bold px-5 py-2 rounded-full hover:bg-blue-600 transition-all duration-300"
+              >Download Now</a
+            >
+            <a
+              href="https://github.com/nolze/tiny-wifi-analyzer"
+              class="bg-gray-600 text-white font-bold px-5 py-2 rounded-full hover:bg-gray-500 transition-all duration-300"
+              >GitHub</a
+            >
+          </div>
         </div>
 
-        <!-- Footer -->
-        <div class="absolute bottom-0 left-0 right-0 py-4 flex justify-center items-center">
-            <p class="text-sm text-gray-500">&copy; 2023 Tiny Wi-Fi Analyzer</p>
+        <!-- Image -->
+        <div class="flex-shrink-0 w-full md:w-1/2">
+          <img
+            src="./assets/screenshot.png"
+            alt="App screenshot"
+            class="rounded-lg"
+          />
         </div>
+      </div>
+
+      <!-- Footer -->
+      <div
+        class="absolute bottom-0 left-0 right-0 pt-4 pb-6 flex justify-center items-center"
+      >
+        <p class="text-sm text-gray-500">
+          &copy; 2020-2025 Tiny Wi-Fi Analyzer
+        </p>
+      </div>
     </div>
-</body>
-
+  </body>
 </html>
