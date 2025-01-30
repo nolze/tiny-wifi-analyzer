@@ -74,7 +74,7 @@ def worker_wait():
         update_queue.put((name, nws))
 
     worker()
-    sleep(10)
+    sleep(5)
 
 
 def to_series(nws):
@@ -107,13 +107,13 @@ def update(window, thread=None):
         nws24 = sorted(nws24, key=lambda x: x.channel.channel_number)
         series24 = to_series(nws24)
         series_json24 = json.dumps(series24)
-        window.evaluate_js("chart24.updateSeries({})".format(series_json24))
+        window.evaluate_js("window.chart24.updateSeries({})".format(series_json24))
 
         nws5 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_5, nws)
         nws5 = sorted(nws5, key=lambda x: x.channel.channel_number)
         series5 = to_series(nws5)
         series_json5 = json.dumps(series5)
-        window.evaluate_js("chart5.updateSeries({})".format(series_json5))
+        window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
     except queue.Empty:
         if thread is None or not thread.is_alive():
             thread = threading.Thread(target=worker_wait)
