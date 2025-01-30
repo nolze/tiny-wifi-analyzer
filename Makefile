@@ -8,6 +8,7 @@ spec:
 		--add-data 'tiny_wifi_analyzer/view:view'
 
 build:
+	pnpm run build
 	poetry run pyinstaller 'Tiny Wi-Fi Analyzer.spec' \
 		--distpath build/dist \
 		--noconfirm \

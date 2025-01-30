@@ -13,9 +13,12 @@ jobs:
         # For Python >= 3.11, the official macOS universal2 Python binaries are simply downloaded from python.org and...
         python-version: ["3.12"]
         poetry-version: ["2.0.1"]
-    runs-on:  macos-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
@@ -29,6 +32,8 @@ jobs:
         run: poetry install
       - name: Set version
         run: echo "APP_VERSION=$(poetry version --short)" >> $GITHUB_ENV
+      - name: Install JS deps
+        run: pnpm install
       - name: Build
         run: make build
       - name: Package app
