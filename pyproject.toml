@@ -6,16 +6,16 @@ authors = ["nolze <nolze@int3.net>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "<3.12,>=3.8"
-pywebview = "~3.7"
-pyobjc-core = "~10.0"
-pyobjc-framework-cocoa = "~10.0"
-pyobjc-framework-CoreWLAN = "~10.0"
-pyobjc-framework-WebKit = "~10.0"
-pyobjc-framework-corelocation = "^10.0"
+python = "<3.14,>=3.9"
+pywebview = "~5"
+pyobjc-core = "~11.0"
+pyobjc-framework-cocoa = "~11.0"
+pyobjc-framework-CoreWLAN = "~11.0"
+pyobjc-framework-WebKit = "~11.0"
+pyobjc-framework-corelocation = "~11.0"
 
-[tool.poetry.dev-dependencies]
-pyinstaller = "^5.13"
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "^6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
