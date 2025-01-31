@@ -40,6 +40,22 @@ Please enable Location Services by following the instructions.
 - [Bezplatné macOS aplikace, které stojí za pozornost [Free macOS apps worth paying attention to] – Jablíčkář.cz](https://jablickar.cz/bezplatne-macos-aplikace-ktere-stoji-za-pozornost-stredove-tlacitko-prepinani-aplikaci-a-virtualizace/4/)
 - [What are your favourite open-source apps? : r/macapps](https://www.reddit.com/r/macapps/comments/140bl4x/comment/jmx1o5g/)
 
+## Develop
+
+```sh
+git clone https://github.com/nolze/tiny-wifi-analyzer
+cd tiny-wifi-analyzer
+poetry install
+poetry run python -m tiny_wifi_analyzer
+
+# Frontend
+pnpm install
+pnpm run watch # or pnpm run build
+
+# Packaging
+make build
+```
+
 ## License
 
 ```
