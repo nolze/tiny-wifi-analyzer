@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "watch": "parcel watch view-src/index.html --dist-dir tiny_wifi_analyzer/view/ --no-source-maps",
-    "build": "parcel build view-src/index.html --dist-dir tiny_wifi_analyzer/view/ --no-source-maps"
+    "build": "mkdir -p tiny_wifi_analyzer/view/ && parcel build view-src/index.html --dist-dir tiny_wifi_analyzer/view/ --no-source-maps"
   },
   "devDependencies": {
     "parcel": "^2.13.3"
