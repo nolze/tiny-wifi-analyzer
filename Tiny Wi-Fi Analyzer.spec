@@ -1,5 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import re
+
+with open("pyproject.toml", "r") as f:
+    content = f.read()
+
+VERSION = re.search(r'^version\s*=\s*"(.*?)"', content, re.MULTILINE).group(1)
+
 block_cipher = None
 
 a = Analysis(
@@ -48,8 +55,8 @@ app = BUNDLE(
     info_plist={
         "NSPrincipalClass": "NSApplication",
         "NSAppleScriptEnabled": False,
-        "CFBundleShortVersionString": "0.2.0",
-        "CFBundleVersion": "0.2.0",
+        "CFBundleShortVersionString": VERSION,
+        "CFBundleVersion": VERSION,
         "NSHighResolutionCapable": True,
         "NSLocationWhenInUseUsageDescription": "On macOS 14 Sonoma and Later, Location Services permission is required to get Wi-Fi SSIDs.",
     },
