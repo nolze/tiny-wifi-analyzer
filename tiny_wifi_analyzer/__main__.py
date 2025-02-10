@@ -27,6 +27,7 @@ is_closing = False
 
 debug_scan_count = 0
 
+webview.settings["ALLOW_DOWNLOADS"] = True
 
 class PyChannel:
     def __init__(self, channel):
