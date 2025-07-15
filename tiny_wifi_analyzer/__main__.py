@@ -19,8 +19,10 @@ logger.addHandler(logging.NullHandler())
 
 CHANNEL_BAND_24 = 1
 CHANNEL_BAND_5 = 2
+CHANNEL_BAND_6 = 3
 CHANNEL_NUMBER_MAX_24 = 16
 CHANNEL_NUMBER_MAX_5 = 170
+CHANNEL_NUMBER_MAX_6 = 233
 
 update_queue = queue.Queue()
 is_closing = False
@@ -115,6 +117,13 @@ def update(window, thread=None):
         series5 = to_series(nws5)
         series_json5 = json.dumps(series5)
         window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
+
+        nws6 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_6, nws)
+        nws6 = sorted(nws6, key=lambda x: x.channel.channel_number)
+        series6 = to_series(nws6)
+        series_json6 = json.dumps(series6)
+        window.evaluate_js("window.chart6.updateSeries({})".format(series_json6))
+
     except queue.Empty:
         if thread is None or not thread.is_alive():
             thread = threading.Thread(target=worker_wait)

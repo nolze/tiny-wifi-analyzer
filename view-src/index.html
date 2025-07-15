@@ -34,12 +34,14 @@
     <div style="display: flex; flex-wrap: wrap">
       <div class="chart" id="chart24"></div>
       <div class="chart" id="chart5"></div>
+      <div class="chart" id="chart6"></div>
     </div>
     <script type="module">
       import ApexCharts from "apexcharts";
 
       const CHANNEL_NUMBER_MAX_24 = 16;
       const CHANNEL_NUMBER_MAX_5 = 170;
+      const CHANNEL_NUMBER_MAX_6 = 233;
 
       function makeOptions(bandName, channels) {
         const options = {
@@ -202,6 +204,17 @@
       );
       window.chart5 = chart5;
       chart5.render();
+
+      const options6 = makeOptions(
+        "6GHz",
+        [...Array(CHANNEL_NUMBER_MAX_6).keys()].map((v) => v + 1),
+      );
+      const chart6 = new ApexCharts(
+        document.querySelector("#chart6"),
+        options6,
+      );
+      window.chart6 = chart6;
+      chart6.render();
     </script>
   </body>
 </html>
