@@ -79,7 +79,7 @@
             curve: "smooth",
           },
           legend: {
-            showForSingleSeries: true,
+            // showForSingleSeries: true,
             position: "left",
             onItemClick: {
               toggleDataSeries: false,
@@ -193,38 +193,50 @@
         return options;
       }
 
-      const options24 = makeOptions(
-        "2.4GHz",
-        [...Array(CHANNEL_NUMBER_MAX_24).keys()].map((v) => v + 1),
-      );
-      const chart24 = new ApexCharts(
-        document.querySelector("#chart24"),
-        options24,
-      );
-      window.chart24 = chart24;
-      chart24.render();
+      window.init = (bands) => {
+        const chart24 = window.chart24;
+        const chart5 = window.chart5;
+        const chart6 = window.chart6;
 
-      const options5 = makeOptions(
-        "5GHz",
-        [...Array(CHANNEL_NUMBER_MAX_5).keys()].map((v) => v + 1),
-      );
-      const chart5 = new ApexCharts(
-        document.querySelector("#chart5"),
-        options5,
-      );
-      window.chart5 = chart5;
-      chart5.render();
+        if (bands["24"]) {
+          const options24 = makeOptions(
+            "2.4GHz",
+            [...Array(CHANNEL_NUMBER_MAX_24).keys()].map((v) => v + 1),
+          );
+          const chart24 = new ApexCharts(
+            document.querySelector("#chart24"),
+            options24,
+          );
+          window.chart24 = chart24;
+          chart24.render();
+        }
 
-      const options6 = makeOptions(
-        "6GHz",
-        [...Array(CHANNEL_NUMBER_MAX_6).keys()].map((v) => v + 1),
-      );
-      const chart6 = new ApexCharts(
-        document.querySelector("#chart6"),
-        options6,
-      );
-      window.chart6 = chart6;
-      chart6.render();
+        if (bands["5"]) {
+          const options5 = makeOptions(
+            "5GHz",
+            [...Array(CHANNEL_NUMBER_MAX_5).keys()].map((v) => v + 1),
+          );
+          const chart5 = new ApexCharts(
+            document.querySelector("#chart5"),
+            options5,
+          );
+          window.chart5 = chart5;
+          chart5.render();
+        }
+
+        if (bands["6"]) {
+          const options6 = makeOptions(
+            "6GHz",
+            [...Array(CHANNEL_NUMBER_MAX_6).keys()].map((v) => v + 1),
+          );
+          const chart6 = new ApexCharts(
+            document.querySelector("#chart6"),
+            options6,
+          );
+          window.chart6 = chart6;
+          chart6.render();
+        }
+      };
     </script>
   </body>
 </html>
