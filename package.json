@@ -7,9 +7,9 @@
     "build": "mkdir -p tiny_wifi_analyzer/view/ && parcel build view-src/index.html --dist-dir tiny_wifi_analyzer/view/ --no-source-maps"
   },
   "devDependencies": {
-    "parcel": "^2.13.3"
+    "parcel": "^2.15.4"
   },
   "dependencies": {
-    "apexcharts": "^4.4.0"
+    "apexcharts": "^4.7.0"
   }
 }
