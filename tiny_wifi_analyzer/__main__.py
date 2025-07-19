@@ -19,8 +19,10 @@ logger.addHandler(logging.NullHandler())
 
 CHANNEL_BAND_24 = 1
 CHANNEL_BAND_5 = 2
+CHANNEL_BAND_6 = 3
 CHANNEL_NUMBER_MAX_24 = 16
 CHANNEL_NUMBER_MAX_5 = 170
+CHANNEL_NUMBER_MAX_6 = 233
 
 update_queue = queue.Queue()
 is_closing = False
@@ -28,6 +30,7 @@ is_closing = False
 debug_scan_count = 0
 
 webview.settings["ALLOW_DOWNLOADS"] = True
+
 
 class PyChannel:
     def __init__(self, channel):
@@ -69,6 +72,25 @@ def scan():
     return name, nws
 
 
+def get_supported_bands():
+    client = CoreWLAN.CWWiFiClient.alloc().init()
+    iface_default = client.interface()
+    channels = iface_default.supportedWLANChannels()
+
+    supported_bands = {"24": False, "5": False, "6": False}
+
+    for channel in channels:
+        band = channel.channelBand()
+        if band == CHANNEL_BAND_24:
+            supported_bands["24"] = True
+        elif band == CHANNEL_BAND_5:
+            supported_bands["5"] = True
+        elif band == CHANNEL_BAND_6:
+            supported_bands["6"] = True
+
+    return supported_bands
+
+
 def worker_wait():
     def worker():
         name, nws = scan()
@@ -92,7 +114,7 @@ def to_series(nws):
     ]
 
 
-def update(window, thread=None):
+def update(window, supported_bands, thread=None):
     global debug_scan_count
 
     if is_closing:
@@ -104,17 +126,27 @@ def update(window, thread=None):
         name, nws = update_queue.get_nowait()
         window.set_title(name)
 
-        nws24 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_24, nws)
-        nws24 = sorted(nws24, key=lambda x: x.channel.channel_number)
-        series24 = to_series(nws24)
-        series_json24 = json.dumps(series24)
-        window.evaluate_js("window.chart24.updateSeries({})".format(series_json24))
+        if supported_bands["24"]:
+            nws24 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_24, nws)
+            nws24 = sorted(nws24, key=lambda x: x.channel.channel_number)
+            series24 = to_series(nws24)
+            series_json24 = json.dumps(series24)
+            window.evaluate_js("window.chart24.updateSeries({})".format(series_json24))
 
-        nws5 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_5, nws)
-        nws5 = sorted(nws5, key=lambda x: x.channel.channel_number)
-        series5 = to_series(nws5)
-        series_json5 = json.dumps(series5)
-        window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
+        if supported_bands["5"]:
+            nws5 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_5, nws)
+            nws5 = sorted(nws5, key=lambda x: x.channel.channel_number)
+            series5 = to_series(nws5)
+            series_json5 = json.dumps(series5)
+            window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
+
+        if supported_bands["6"]:
+            nws6 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_6, nws)
+            nws6 = sorted(nws6, key=lambda x: x.channel.channel_number)
+            series6 = to_series(nws6)
+            series_json6 = json.dumps(series6)
+            window.evaluate_js("window.chart6.updateSeries({})".format(series_json6))
+
     except queue.Empty:
         if thread is None or not thread.is_alive():
             thread = threading.Thread(target=worker_wait)
@@ -126,9 +158,12 @@ def update(window, thread=None):
 
 
 def startup(window):
+    supported_bands = get_supported_bands()
+    window.evaluate_js("window.init({})".format(json.dumps(supported_bands)))
+
     thread = None
     while True:
-        thread = update(window, thread)
+        thread = update(window, supported_bands, thread)
         if thread is None:
             break
         sleep(1)
