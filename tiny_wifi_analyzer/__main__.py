@@ -157,9 +157,13 @@ def update(window, supported_bands, thread=None):
     return thread
 
 
-def startup(window):
+def setup_client(window):
     supported_bands = get_supported_bands()
     window.evaluate_js("window.init({})".format(json.dumps(supported_bands)))
+
+
+def startup(window):
+    supported_bands = get_supported_bands()
 
     thread = None
     while True:
@@ -229,6 +233,7 @@ def main():
     index_html = os.path.join(os.path.dirname(__file__), "view/index.html")
     window = webview.create_window("Tiny Wi-Fi Analyzer", index_html)
     window.events.closing += on_closing
+    window.events.loaded += setup_client
     webview.start(startup, window, debug=True)
 
 
