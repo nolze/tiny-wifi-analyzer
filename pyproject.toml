@@ -16,6 +16,7 @@ pyobjc-framework-corelocation = "~11.0"
 
 [tool.poetry.group.dev.dependencies]
 pyinstaller = "^6"
+pytest = "^8.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
