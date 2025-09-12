@@ -29,7 +29,7 @@ logger.addHandler(logging.NullHandler())
 
 update_queue = queue.Queue()
 is_closing = False
-
+scanner_thread = None
 debug_scan_count = 0
 
 webview.settings["ALLOW_DOWNLOADS"] = True
@@ -94,13 +94,28 @@ def get_supported_bands():
     return supported_bands
 
 
-def worker_wait():
-    def worker():
-        name, nws = scan()
-        update_queue.put((name, nws))
+def start_scanner(interval_ms: int) -> threading.Thread:
+    def loop():
+        # initial small delay to let UI init
+        sleep(0.2)
+        while not is_closing:
+            try:
+                name, nws = scan()
+                update_queue.put((name, nws))
+                # # track and optionally log scan count
+                # global debug_scan_count
+                # debug_scan_count += 1
+                # logger.debug(
+                #     "debug_scan_count=%d networks=%d", debug_scan_count, len(nws)
+                # )
+            except Exception as e:  # pragma: no cover - platform specific
+                logger.warning("scan failed: %s", e)
+            # sleep for interval
+            sleep(max(0.05, interval_ms / 1000.0))
 
-    worker()
-    sleep(5)
+    t = threading.Thread(target=loop, name="scanner", daemon=True)
+    t.start()
+    return t
 
 
 def to_series(nws):
@@ -108,16 +123,19 @@ def to_series(nws):
     return series_from_networks(nws)
 
 
-def update(window, supported_bands, thread=None):
-    global debug_scan_count
-
+def update(window, supported_bands):
     if is_closing:
-        return None
-
-    logger.debug(debug_scan_count)
+        return
 
     try:
+        # If there are multiple queued updates, take the most recent snapshot
         name, nws = update_queue.get_nowait()
+        while True:
+            try:
+                name, nws = update_queue.get_nowait()
+            except queue.Empty:
+                break
+
         window.set_title(name)
 
         if supported_bands["24"]:
@@ -142,13 +160,8 @@ def update(window, supported_bands, thread=None):
             window.evaluate_js("window.chart6.updateSeries({})".format(series_json6))
 
     except queue.Empty:
-        if thread is None or not thread.is_alive():
-            thread = threading.Thread(target=worker_wait)
-            thread.daemon = True
-            thread.start()
-            debug_scan_count += 1
-
-    return thread
+        # nothing to do this tick
+        pass
 
 
 def setup_client(window):
@@ -157,14 +170,17 @@ def setup_client(window):
 
 
 def startup(window):
-    supported_bands = get_supported_bands()
+    # configure and start background scanner (fixed interval)
+    interval_ms = 3000
+    global scanner_thread
+    if scanner_thread is None:
+        scanner_thread = start_scanner(interval_ms)
 
-    thread = None
-    while True:
-        thread = update(window, supported_bands, thread)
-        if thread is None:
-            break
-        sleep(1)
+    supported_bands = get_supported_bands()
+    # UI update loop
+    while not is_closing:
+        update(window, supported_bands)
+        sleep(0.3)
 
 
 def on_closing():
@@ -215,6 +231,9 @@ def request_location_permission():
 
 
 def main():
+    # Default logging level
+    logging.basicConfig(level=logging.WARNING)
+
     # NOTE: Sonoma (macOS 11) and later requires location permission to read Wi-Fi SSIDs.
     os_version = AppKit.NSAppKitVersionNumber
     # print(os_version, AppKit.NSAppKitVersionNumber13_1)
