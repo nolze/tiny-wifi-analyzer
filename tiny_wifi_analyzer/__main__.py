@@ -14,15 +14,18 @@ import webview
 # NOTE: https://github.com/r0x0r/pywebview/issues/496
 from objc import nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
 
+from .series import (
+    CHANNEL_BAND_24,
+    CHANNEL_BAND_5,
+    CHANNEL_BAND_6,
+    CHANNEL_NUMBER_MAX_24,
+    CHANNEL_NUMBER_MAX_5,
+    CHANNEL_NUMBER_MAX_6,
+    to_series as series_from_networks,
+)
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
-
-CHANNEL_BAND_24 = 1
-CHANNEL_BAND_5 = 2
-CHANNEL_BAND_6 = 3
-CHANNEL_NUMBER_MAX_24 = 16
-CHANNEL_NUMBER_MAX_5 = 170
-CHANNEL_NUMBER_MAX_6 = 233
 
 update_queue = queue.Queue()
 is_closing = False
@@ -101,17 +104,8 @@ def worker_wait():
 
 
 def to_series(nws):
-    return [
-        {
-            "name": nw.ssid,
-            "data": [
-                [nw.channel.channel_number - nw.channel.channel_width * 2, -100],
-                [nw.channel.channel_number, nw.rssi],
-                [nw.channel.channel_number + nw.channel.channel_width * 2, -100],
-            ],
-        }
-        for nw in nws
-    ]
+    # Delegate to pure implementation that maps MHz widths to channel steps
+    return series_from_networks(nws)
 
 
 def update(window, supported_bands, thread=None):
