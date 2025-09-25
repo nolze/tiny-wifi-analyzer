@@ -96,8 +96,6 @@ def get_supported_bands():
 
 def start_scanner(interval_ms: int) -> threading.Thread:
     def loop():
-        # initial small delay to let UI init
-        sleep(0.2)
         while not is_closing:
             try:
                 name, nws = scan()
