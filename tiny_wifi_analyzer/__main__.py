@@ -14,7 +14,7 @@ import webview
 # NOTE: https://github.com/r0x0r/pywebview/issues/496
 from objc import nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
 
-from .series import (
+from tiny_wifi_analyzer.series import (
     CHANNEL_BAND_24,
     CHANNEL_BAND_5,
     CHANNEL_BAND_6,
