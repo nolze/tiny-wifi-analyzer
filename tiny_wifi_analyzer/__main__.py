@@ -141,21 +141,26 @@ def update(window, supported_bands):
             nws24 = sorted(nws24, key=lambda x: x.channel.channel_number)
             series24 = to_series(nws24)
             series_json24 = json.dumps(series24)
-            window.evaluate_js("window.chart24.updateSeries({})".format(series_json24))
+            # window.evaluate_js("window.chart24.updateSeries({})".format(series_json24))
+            window.evaluate_js(
+                "window.updateChart('{}',{})".format("24", series_json24)
+            )
 
         if supported_bands["5"]:
             nws5 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_5, nws)
             nws5 = sorted(nws5, key=lambda x: x.channel.channel_number)
             series5 = to_series(nws5)
             series_json5 = json.dumps(series5)
-            window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
+            # window.evaluate_js("window.chart5.updateSeries({})".format(series_json5))
+            window.evaluate_js("window.updateChart('{}',{})".format("5", series_json5))
 
         if supported_bands["6"]:
             nws6 = filter(lambda x: x.channel.channel_band == CHANNEL_BAND_6, nws)
             nws6 = sorted(nws6, key=lambda x: x.channel.channel_number)
             series6 = to_series(nws6)
             series_json6 = json.dumps(series6)
-            window.evaluate_js("window.chart6.updateSeries({})".format(series_json6))
+            # window.evaluate_js("window.chart6.updateSeries({})".format(series_json6))
+            window.evaluate_js("window.updateChart('{}',{})".format("6", series_json6))
 
     except queue.Empty:
         # nothing to do this tick

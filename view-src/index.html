@@ -30,6 +30,21 @@
       .annotation {
         font-family: sans-serif;
       }
+
+      rect.legend-mouseover-inactive,
+      .legend-mouseover-inactive rect,
+      .legend-mouseover-inactive path,
+      .legend-mouseover-inactive circle,
+      .legend-mouseover-inactive line,
+      .legend-mouseover-inactive text.apexcharts-yaxis-title-text,
+      .legend-mouseover-inactive text.apexcharts-yaxis-label {
+        transition: 0.15s ease all;
+        opacity: 0.1 !important;
+      }
+
+      .legend-mouseover-inactive .apexcharts-data-labels {
+        opacity: 0 !important;
+      }
     </style>
   </head>
 
@@ -46,9 +61,10 @@
       const CHANNEL_NUMBER_MAX_5 = 170;
       const CHANNEL_NUMBER_MAX_6 = 233;
 
+      let rawSeriesData = {};
       let lastZoom = {};
 
-      function makeOptions(bandName, channels) {
+      function makeOptions(bandId, bandName, channels) {
         const options = {
           series: [],
           chart: {
@@ -161,10 +177,17 @@
             formatter: (seriesName, { seriesIndex, w }) => {
               const yValue = w.config.series[seriesIndex].data[1][1];
               const xValue = w.config.series[seriesIndex].data[1][0];
+              let ssid = rawSeriesData[bandId][seriesIndex].ssid;
+              if (ssid === null) ssid = "n/a";
+              const bssid = rawSeriesData[bandId][seriesIndex].name;
               return [
                 `Channel: ${xValue} RSSI: ${yValue}dBm`,
                 "<br>",
-                `<b>${seriesName}</b>`,
+                ssid != "n/a"
+                  ? `<b>${ssid}</b>`
+                  : `<b style="color:#888;">${ssid}</b>`,
+                "<br>",
+                `<span style="font-size:0.9em;color:#888;">${bssid}</span>`,
               ];
             },
           },
@@ -211,9 +234,11 @@
             enabled: true,
             formatter: (val, { seriesIndex, dataPointIndex, w }) => {
               if (val === -100) return "";
-              const name = w.config.series[seriesIndex].name;
+              // const ssid = w.config.series[seriesIndex].ssid;
+              const ssid = rawSeriesData[bandId][seriesIndex].ssid;
               const ch = w.config.series[seriesIndex].data[1][0];
-              return `${ch} ${name}`;
+              if (ssid === null) return `${ch} n/a`;
+              return `${ch} ${ssid}`;
             },
           },
           markers: {
@@ -274,6 +299,7 @@
 
         if (bands["24"]) {
           const options24 = makeOptions(
+            "24",
             "2.4GHz",
             [...Array(CHANNEL_NUMBER_MAX_24).keys()].map((v) => v + 1),
           );
@@ -287,6 +313,7 @@
 
         if (bands["5"]) {
           const options5 = makeOptions(
+            "5",
             "5GHz",
             [...Array(CHANNEL_NUMBER_MAX_5).keys()].map((v) => v + 1),
           );
@@ -300,6 +327,7 @@
 
         if (bands["6"]) {
           const options6 = makeOptions(
+            "6",
             "6GHz",
             [...Array(CHANNEL_NUMBER_MAX_6).keys()].map((v) => v + 1),
           );
@@ -309,6 +337,17 @@
           );
           window.chart6 = chart6;
           chart6.render();
+        }
+      };
+
+      window.updateChart = (bandId, series) => {
+        if (window[`chart${bandId}`]) {
+          rawSeriesData[bandId] = series;
+          try {
+            window[`chart${bandId}`].updateSeries(series);
+          } catch (e) {
+            console.error("Failed to update series", e);
+          }
         }
       };
     </script>

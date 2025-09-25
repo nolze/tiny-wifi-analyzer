@@ -52,15 +52,17 @@ class _Chan:
 @dataclass
 class _Net:
     ssid: str
+    bssid: str
     rssi: int
     channel: _Chan
 
 
-def to_series(nws: List[object]) -> List[dict]:
+def to_series(nws: List[_Net]) -> List[dict]:
     """Convert networks to ApexCharts series data with correct spans.
 
     Expects items resembling PyNetwork:
       - .ssid: str
+      _ .bssid: str
       - .rssi: int
       - .channel.channel_band: int
       - .channel.channel_number: int
@@ -77,7 +79,10 @@ def to_series(nws: List[object]) -> List[dict]:
             right = _clamp_channel(center + half, band)
             series.append(
                 {
-                    "name": nw.ssid,
+                    # "name": nw.ssid,
+                    # "bssid": nw.bssid,
+                    "name": nw.bssid,
+                    "ssid": nw.ssid,
                     "data": [[left, -100], [center, int(nw.rssi)], [right, -100]],
                 }
             )
