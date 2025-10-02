@@ -20,7 +20,7 @@
         padding-right: 20px;
       }
 
-      .chart {
+      .chart-container {
         width: 100%;
         max-width: 1200px;
         max-height: 800px;
@@ -45,14 +45,38 @@
       .legend-mouseover-inactive .apexcharts-data-labels {
         opacity: 0 !important;
       }
+
+      .apexcharts-toolbar-custom-icon {
+        padding-top: 2px !important;
+        padding-right: 4px !important;
+        padding-left: 6px !important;
+      }
+
+      .chart-container.full-window {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        z-index: 9999;
+        background-color: white;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      .noscroll {
+        overflow: hidden;
+      }
     </style>
   </head>
 
   <body>
-    <div style="display: flex; flex-wrap: wrap">
-      <div class="chart" id="chart24"></div>
-      <div class="chart" id="chart5"></div>
-      <div class="chart" id="chart6"></div>
+    <div id="charts" style="display: flex; flex-wrap: wrap">
+      <div class="chart-container"><div class="chart" id="chart24"></div></div>
+      <div class="chart-container"><div class="chart" id="chart5"></div></div>
+      <div class="chart-container"><div class="chart" id="chart6"></div></div>
     </div>
     <script type="module">
       import ApexCharts from "apexcharts";
@@ -69,6 +93,9 @@
           series: [],
           chart: {
             type: "area",
+            redrawOnParentResize: true,
+            height: "auto",
+            width: "100%",
             zoom: {
               enabled: true,
               allowMouseWheelZoom: false,
@@ -144,6 +171,27 @@
                 zoomout: false,
                 reset:
                   '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 16v-2.5q0-.625.438-1.062T13.5 12H16v1.5h-2.5V16zm1.5 6q-.625 0-1.062-.437T12 20.5V18h1.5v2.5H16V22zm7-6v-2.5H18V12h2.5q.625 0 1.063.438T22 13.5V16zM18 22v-1.5h2.5V18H22v2.5q0 .625-.437 1.063T20.5 22zm2.775-12H18.7q-.65-2.2-2.475-3.6T12 5Q9.075 5 7.037 7.038T5 12q0 1.8.813 3.3T8 17.75V15h2v6H4v-2h2.35Q4.8 17.75 3.9 15.938T3 12q0-1.875.713-3.512t1.924-2.85t2.85-1.925T12 3q3.225 0 5.663 1.988T20.775 10"/></svg>',
+                customIcons: [
+                  {
+                    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M20 8V6h-2q-.425 0-.712-.288T17 5t.288-.712T18 4h2q.825 0 1.413.588T22 6v2q0 .425-.288.713T21 9t-.712-.288T20 8M2 8V6q0-.825.588-1.412T4 4h2q.425 0 .713.288T7 5t-.288.713T6 6H4v2q0 .425-.288.713T3 9t-.712-.288T2 8m18 12h-2q-.425 0-.712-.288T17 19t.288-.712T18 18h2v-2q0-.425.288-.712T21 15t.713.288T22 16v2q0 .825-.587 1.413T20 20M4 20q-.825 0-1.412-.587T2 18v-2q0-.425.288-.712T3 15t.713.288T4 16v2h2q.425 0 .713.288T7 19t-.288.713T6 20zm2-6v-4q0-.825.588-1.412T8 8h8q.825 0 1.413.588T18 10v4q0 .825-.587 1.413T16 16H8q-.825 0-1.412-.587T6 14m2 0h8v-4H8zm0 0v-4z"/></svg>',
+                    index: 2,
+                    title: "Toggle Expand",
+                    click: (chart, options, e) => {
+                      const chartEl = chart.el;
+                      if (
+                        chartEl.parentElement.classList.contains("full-window")
+                      ) {
+                        options.config.chart.height = "auto";
+                        chartEl.parentElement.classList.remove("full-window");
+                        document.body.classList.remove("noscroll");
+                      } else {
+                        options.config.chart.height = "100%";
+                        chartEl.parentElement.classList.add("full-window");
+                        document.body.classList.add("noscroll");
+                      }
+                    },
+                  },
+                ],
               },
               export: {
                 csv: {
