@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tiny-wifi-analyzer"
-version = "0.6.0rc3"
+version = "0.6.0"
 description = "A tiny Wi-Fi analyzer for macOS"
 authors = ["nolze <nolze@int3.net>"]
 license = "Apache-2.0"
