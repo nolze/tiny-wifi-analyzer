@@ -208,7 +208,8 @@ class LocationManagerDelegate(AppKit.NSObject):
             + "Please enable Location Services in System Preferences > Security & Privacy > Privacy > Location Services."
         )
         alert.addButtonWithTitle_("Open Preferences")
-        alert.addButtonWithTitle_("OK")
+        alert.addButtonWithTitle_("Ignore")
+        alert.addButtonWithTitle_("Quit")
         response = alert.runModal()
         if response == AppKit.NSAlertFirstButtonReturn:
             AppKit.NSWorkspace.sharedWorkspace().openURL_(
@@ -216,7 +217,10 @@ class LocationManagerDelegate(AppKit.NSObject):
                     "x-apple.systempreferences:com.apple.preference.security?Privacy_LocationServices"
                 )
             )
-        AppKit.NSApplication.sharedApplication().terminate_(None)
+        elif response == AppKit.NSAlertSecondButtonReturn:
+            pass
+        else:
+            AppKit.NSApplication.sharedApplication().terminate_(None)
 
 
 def request_location_permission():
