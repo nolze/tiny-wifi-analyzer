@@ -12,17 +12,6 @@ CHANNEL_NUMBER_MAX_5 = 170
 CHANNEL_NUMBER_MAX_6 = 233
 
 
-def channel_bounds_for_band(band: int) -> Tuple[int, int]:
-    if band == CHANNEL_BAND_24:
-        return 1, CHANNEL_NUMBER_MAX_24
-    if band == CHANNEL_BAND_5:
-        return 1, CHANNEL_NUMBER_MAX_5
-    if band == CHANNEL_BAND_6:
-        return 1, CHANNEL_NUMBER_MAX_6
-    # Fallback to a safe default range
-    return 1, CHANNEL_NUMBER_MAX_5
-
-
 def channel_half_span_for_width(width_mhz: int | None) -> int:
     """Convert MHz channel width into half-span measured in channel number steps.
 
@@ -37,9 +26,95 @@ def channel_half_span_for_width(width_mhz: int | None) -> int:
     return half
 
 
-def _clamp_channel(value: int, band: int) -> int:
-    lo, hi = channel_bounds_for_band(band)
-    return max(lo, min(hi, int(value)))
+def get_channel_block(primary_channel: int, width_mhz: int, band: int, span_direction: str | None) -> Tuple[int, int]:
+    """Calculate the actual channel block for a given primary channel and width.
+
+    WiFi channels occupy predefined blocks, especially for wider channels.
+    Returns (left, right) channel numbers for the block.
+    """
+    if width_mhz == 20:
+        # 20 MHz: narrow span around the primary channel
+        return (primary_channel - 2, primary_channel + 2)
+
+    if band == CHANNEL_BAND_24:
+        # 2.4 GHz 40 MHz channels
+        # HT40+ uses primary + extension above, HT40- uses primary + extension below
+        if width_mhz == 40:
+            # 40MHz spans 8 channels total (40MHz / 5MHz per channel)
+            if span_direction == 'upper':
+                return (primary_channel - 2, primary_channel + 6)
+            elif span_direction == 'lower':
+                return (primary_channel - 6, primary_channel + 2)
+            else:
+                # default to upper if primary channel is low, lower if primary channel is high
+                if primary_channel <= 7:
+                    return (primary_channel - 2, primary_channel + 6)
+                else:
+                    return (primary_channel - 6, primary_channel + 2)
+
+    if band == CHANNEL_BAND_5:
+        # 5 GHz uses specific channel blocks for 40/80/160 MHz widths
+        if width_mhz == 40:
+            # 40 MHz blocks
+            if 36 <= primary_channel <= 40:
+                return (34, 42)
+            elif 44 <= primary_channel <= 48:
+                return (42, 50)
+            elif 52 <= primary_channel <= 56:
+                return (50, 58)
+            elif 60 <= primary_channel <= 64:
+                return (58, 66)
+            elif 100 <= primary_channel <= 104:
+                return (98, 106)
+            elif 108 <= primary_channel <= 112:
+                return (106, 114)
+            elif 116 <= primary_channel <= 120:
+                return (114, 122)
+            elif 124 <= primary_channel <= 128:
+                return (122, 130)
+            elif 132 <= primary_channel <= 136:
+                return (130, 138)
+            elif 140 <= primary_channel <= 144:
+                return (138, 146)
+            elif 149 <= primary_channel <= 153:
+                return (147, 155)
+            elif 157 <= primary_channel <= 161:
+                return (155, 163)
+            elif 165 <= primary_channel <= 169:
+                return (163, 171)
+            elif 173 <= primary_channel <= 177:
+                return (171, 179)
+
+        elif width_mhz == 80:
+            # 80 MHz blocks
+            if 36 <= primary_channel <= 48:
+                return (34, 50)
+            elif 52 <= primary_channel <= 64:
+                return (50, 66)
+            elif 100 <= primary_channel <= 112:
+                return (98, 114)
+            elif 116 <= primary_channel <= 128:
+                return (114, 130)
+            elif 132 <= primary_channel <= 144:
+                return (130, 146)
+            elif 149 <= primary_channel <= 161:
+                return (147, 163)
+            elif 165 <= primary_channel <= 177:
+                return (163, 179)
+
+        elif width_mhz == 160:
+            # 160 MHz blocks
+            if 36 <= primary_channel <= 64:
+                return (34, 66)
+            elif 100 <= primary_channel <= 128:
+                return (98, 130)
+            # no 160 MHz block between 132-144
+            elif 149 <= primary_channel <= 177:
+                return (147, 179)
+
+    # Fallback to simple spanning
+    half = channel_half_span_for_width(width_mhz)
+    return (primary_channel - half, primary_channel + half)
 
 
 @dataclass
@@ -72,18 +147,22 @@ def to_series(nws: List[_Net]) -> List[dict]:
     for nw in nws:
         try:
             band = nw.channel.channel_band
-            center = int(nw.channel.channel_number)
+            reported_channel = int(nw.channel.channel_number)
             width_mhz = int(nw.channel.channel_width)
-            half = channel_half_span_for_width(width_mhz)
-            left = _clamp_channel(center - half, band)
-            right = _clamp_channel(center + half, band)
+            span_direction = nw.channel.span_direction
+
+            left, right = get_channel_block(reported_channel, width_mhz, band, span_direction)
+
+            middle = (left + right) / 2
+
             series.append(
                 {
                     # "name": nw.ssid,
                     # "bssid": nw.bssid,
                     "name": nw.bssid,
                     "ssid": nw.ssid,
-                    "data": [[left, -100], [center, int(nw.rssi)], [right, -100]],
+                    "channel": reported_channel,  # Store primary channel for labeling
+                    "data": [[left, -100], [middle, int(nw.rssi)], [right, -100]],
                 }
             )
         except Exception:

@@ -225,7 +225,7 @@
             },
             formatter: (seriesName, { seriesIndex, w }) => {
               const yValue = w.config.series[seriesIndex].data[1][1];
-              const xValue = w.config.series[seriesIndex].data[1][0];
+              const xValue = rawSeriesData[bandId][seriesIndex].channel;
               let ssid = rawSeriesData[bandId][seriesIndex].ssid;
               if (ssid === null) ssid = "n/a";
               const bssid = rawSeriesData[bandId][seriesIndex].name;
@@ -243,13 +243,18 @@
           xaxis: {
             type: "category",
             categories: channels,
-            min: channels[0],
+            min: bandId === "24" ? -1 : channels[0],
             max: channels[channels.length - 1],
             tickAmount: Math.min(channels.length - 1, 15),
             tickPlacement: "on",
             labels: {
               rotate: false,
               hideOverlappingLabels: true,
+              formatter: (value) => {
+                // Don't show labels below 1 for 2.4GHz
+                if (bandId === "24" && value < 1) return "";
+                return Math.round(value);
+              },
             },
             title: {
               text: "channel",
@@ -285,7 +290,7 @@
               if (val === -100) return "";
               // const ssid = w.config.series[seriesIndex].ssid;
               const ssid = rawSeriesData[bandId][seriesIndex].ssid;
-              const ch = w.config.series[seriesIndex].data[1][0];
+              const ch = rawSeriesData[bandId][seriesIndex].channel;
               if (ssid === null) return `${ch} n/a`;
               return `${ch} ${ssid}`;
             },
