@@ -30,6 +30,8 @@ jobs:
         run: poetry config virtualenvs.create false --local
       - name: Install deps
         run: poetry install
+      - name: Run tests
+        run: poetry run pytest -vs
       - name: Set version
         run: echo "APP_VERSION=$(poetry version --short)" >> $GITHUB_ENV
       - name: Install JS deps
