@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import List, Tuple
 
 # CoreWLAN-compatible band identifiers
@@ -26,7 +27,9 @@ def channel_half_span_for_width(width_mhz: int | None) -> int:
     return half
 
 
-def get_channel_block(primary_channel: int, width_mhz: int, band: int, span_direction: str | None) -> Tuple[int, int]:
+def get_channel_block(
+    primary_channel: int, width_mhz: int, band: int, span_direction: str | None
+) -> Tuple[int, int]:
     """Calculate the actual channel block for a given primary channel and width.
 
     WiFi channels occupy predefined blocks, especially for wider channels.
@@ -41,9 +44,9 @@ def get_channel_block(primary_channel: int, width_mhz: int, band: int, span_dire
         # HT40+ uses primary + extension above, HT40- uses primary + extension below
         if width_mhz == 40:
             # 40MHz spans 8 channels total (40MHz / 5MHz per channel)
-            if span_direction == 'upper':
+            if span_direction == "upper":
                 return (primary_channel - 2, primary_channel + 6)
-            elif span_direction == 'lower':
+            elif span_direction == "lower":
                 return (primary_channel - 6, primary_channel + 2)
             else:
                 # default to upper if primary channel is low, lower if primary channel is high
@@ -117,11 +120,17 @@ def get_channel_block(primary_channel: int, width_mhz: int, band: int, span_dire
     return (primary_channel - half, primary_channel + half)
 
 
+class SpanDirection(StrEnum):
+    UPPER = "upper"
+    LOWER = "lower"
+
+
 @dataclass
 class _Chan:
     channel_band: int
     channel_number: int
     channel_width: int
+    span_direction: SpanDirection | None = None
 
 
 @dataclass
@@ -151,7 +160,9 @@ def to_series(nws: List[_Net]) -> List[dict]:
             width_mhz = int(nw.channel.channel_width)
             span_direction = nw.channel.span_direction
 
-            left, right = get_channel_block(reported_channel, width_mhz, band, span_direction)
+            left, right = get_channel_block(
+                reported_channel, width_mhz, band, span_direction
+            )
 
             middle = (left + right) / 2
 
