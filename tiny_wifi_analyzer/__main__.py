@@ -2,8 +2,8 @@ import json
 import logging
 import os.path
 import queue
-import threading
 import re
+import threading
 from time import sleep
 
 import AppKit
@@ -16,9 +16,11 @@ import webview
 from objc import nil, registerMetaDataForSelector  # pylint: disable=unused-import # noqa F401
 
 from tiny_wifi_analyzer.series import (
-    CHANNEL_BAND_24,
     CHANNEL_BAND_5,
     CHANNEL_BAND_6,
+    CHANNEL_BAND_24,
+)
+from tiny_wifi_analyzer.series import (
     to_series as series_from_networks,
 )
 
@@ -38,7 +40,9 @@ class PyChannel:
         self.channel_band = channel.channelBand()
         self.channel_number = channel.channelNumber()
         self.channel_width = self._convert_width_enum_to_mhz(channel.channelWidth())
-        self.span_direction = self._parse_span_direction_from_description(channel.description())
+        self.span_direction = self._parse_span_direction_from_description(
+            channel.description()
+        )
 
     def _convert_width_enum_to_mhz(self, width_enum):
         """Convert CoreWLAN channel width enum to MHz."""
@@ -52,20 +56,21 @@ class PyChannel:
 
     def _parse_span_direction_from_description(self, description):
         """Parse the span direction (e.g., HT40+, HT40-) from the channel description string."""
-        match = re.search(r'.*channelWidth=\{\d+MHz(?:\(([+-])1\))?\}', description)
+        match = re.search(r".*channelWidth=\{\d+MHz(?:\(([+-])1\))?\}", description)
         if match:
             direction = match.group(1)
-            if direction == '+':
-                return 'upper'
-            elif direction == '-':
-                return 'lower'
+            if direction == "+":
+                return "upper"
+            elif direction == "-":
+                return "lower"
         return None
 
     def __repr__(self):
-        return (
-            "<CWChannel> [channel_band={}, channel_number={}, channel_width={}, span_direction={}]".format(
-                self.channel_band, self.channel_number, self.channel_width, self.span_direction
-            )
+        return "<CWChannel> [channel_band={}, channel_number={}, channel_width={}, span_direction={}]".format(
+            self.channel_band,
+            self.channel_number,
+            self.channel_width,
+            self.span_direction,
         )
 
 
