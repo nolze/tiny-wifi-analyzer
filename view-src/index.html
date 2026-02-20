@@ -88,6 +88,28 @@
       let rawSeriesData = {};
       let lastZoom = {};
 
+      // Generate a consistent color for an SSID
+      async function getColorForSSID(ssid, ctx) {
+        // Get the color palette from ApexCharts theme
+        const colorPalette = ctx.theme.predefined();
+
+        // Handle null/undefined SSIDs
+        if (ssid === null || ssid === undefined || ssid === 'n/a') {
+          return '#888888'; // Gray for unknown networks
+        }
+
+        // Generate a hash from the SSID string
+        const encoder = new TextEncoder();
+        const data = encoder.encode(ssid);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hash = hashArray[0]; // Use the first byte of the hash for color indexing
+
+        // Map hash to color palette
+        const colorIndex = hash % colorPalette.length;
+        return colorPalette[colorIndex];
+      }
+
       function makeOptions(bandId, bandName, channels) {
         const options = {
           series: [],
@@ -394,11 +416,19 @@
         }
       };
 
-      window.updateChart = (bandId, series) => {
-        if (window[`chart${bandId}`]) {
+      window.updateChart = async (bandId, series) => {
+        const chart = window[`chart${bandId}`];
+        if (chart) {
           rawSeriesData[bandId] = series;
+
+          // Apply colors based on SSID
+          const seriesWithColors = await Promise.all(series.map(async (s) => ({
+            ...s,
+            color: await getColorForSSID(s.ssid, chart.ctx)
+          })));
+
           try {
-            window[`chart${bandId}`].updateSeries(series);
+            window[`chart${bandId}`].updateSeries(seriesWithColors);
           } catch (e) {
             console.error("Failed to update series", e);
           }
