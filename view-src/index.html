@@ -20,11 +20,83 @@
         padding-right: 20px;
       }
 
+      .graph-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 12px 0;
+      }
+
+      .graph-controls input {
+        flex: 1 1 200px;
+        padding: 5px 10px;
+        border: 1px solid #e1e1e1;
+        border-radius: 4px;
+        font-size: 11px;
+        font-family: inherit;
+        background: #fff;
+        color: #333;
+        outline: none;
+        transition: border-color 0.2s ease;
+      }
+
+      .graph-controls input:focus {
+        border-color: #ccc;
+      }
+
+      .graph-controls input::placeholder {
+        color: #bbb;
+        font-weight: 300;
+        font-style: italic;
+      }
+
+      .graph-controls button {
+        padding: 5px 12px;
+        border: 1px solid #e1e1e1;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 400;
+        color: #666;
+        transition: all 0.2s ease;
+      }
+
+      .graph-controls button:hover {
+        background: #fcfcfc;
+        border-color: #d1d1d1;
+        color: #333;
+      }
+
+      .graph-controls button[data-frozen="true"] {
+        background: #f5f5f5;
+        border-color: #d1d1d1;
+        color: #000;
+      }
+
+      .apexcharts-series.filtered-out,
+      .apexcharts-legend-series.filtered-out {
+        opacity: 0.15;
+        transition: opacity 0.15s ease;
+      }
+
       .chart-container {
         width: 100%;
         max-width: 1200px;
         max-height: 800px;
         margin: 0 auto;
+      }
+
+      .chart-container.with-separator {
+        margin-bottom: 16px;
+      }
+
+      .chart-container.with-separator::after {
+        content: "";
+        display: block;
+        margin-top: 16px;
+        border-bottom: 1px solid #e6e6e6;
       }
 
       .annotation {
@@ -74,9 +146,42 @@
 
   <body>
     <div id="charts" style="display: flex; flex-wrap: wrap">
-      <div class="chart-container"><div class="chart" id="chart24"></div></div>
-      <div class="chart-container"><div class="chart" id="chart5"></div></div>
-      <div class="chart-container"><div class="chart" id="chart6"></div></div>
+      <div class="chart-container with-separator">
+        <div class="graph-controls" id="controls24" data-band-id="24">
+          <input
+            data-role="filter"
+            type="text"
+            placeholder="Search SSID or MAC/BSSID"
+          />
+          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="clear" type="button">Clear</button>
+        </div>
+        <div class="chart" id="chart24"></div>
+      </div>
+      <div class="chart-container with-separator">
+        <div class="graph-controls" id="controls5" data-band-id="5">
+          <input
+            data-role="filter"
+            type="text"
+            placeholder="Search SSID or MAC/BSSID"
+          />
+          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="clear" type="button">Clear</button>
+        </div>
+        <div class="chart" id="chart5"></div>
+      </div>
+      <div class="chart-container">
+        <div class="graph-controls" id="controls6" data-band-id="6">
+          <input
+            data-role="filter"
+            type="text"
+            placeholder="Search SSID or MAC/BSSID"
+          />
+          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="clear" type="button">Clear</button>
+        </div>
+        <div class="chart" id="chart6"></div>
+      </div>
     </div>
     <script type="module">
       import ApexCharts from "apexcharts";
@@ -86,7 +191,109 @@
       const CHANNEL_NUMBER_MAX_6 = 233;
 
       let rawSeriesData = {};
+      let latestSeriesData = {};
       let lastZoom = {};
+      const bandState = {
+        "24": { filterQuery: "", frozen: false },
+        "5": { filterQuery: "", frozen: false },
+        "6": { filterQuery: "", frozen: false },
+      };
+
+      const BANDS = ["24", "5", "6"];
+
+      function normalize(value) {
+        if (value === null || value === undefined) return "";
+        return String(value).trim().toLowerCase();
+      }
+
+      function isMatch(bandId, entry) {
+        const needle = normalize(bandState[bandId]?.filterQuery);
+        if (!needle) return true;
+        const ssid = normalize(entry.ssid);
+        const bssid = normalize(entry.name);
+        return ssid.includes(needle) || bssid.includes(needle);
+      }
+
+      function applyFilteredOutClass(chart, matchFlags) {
+        const seriesEls = chart.el.querySelectorAll(".apexcharts-series");
+        seriesEls.forEach((el, index) => {
+          el.classList.toggle("filtered-out", !matchFlags[index]);
+        });
+
+        const legendEls = chart.el.querySelectorAll(".apexcharts-legend-series");
+        legendEls.forEach((el, index) => {
+          el.classList.toggle("filtered-out", !matchFlags[index]);
+        });
+      }
+
+      function getBandMatchFlags(bandId) {
+        const series = rawSeriesData[bandId] || [];
+        return series.map((entry) => isMatch(bandId, entry));
+      }
+
+      function syncBandFiltering(bandId) {
+        const chart = window[`chart${bandId}`];
+        if (!chart || !rawSeriesData[bandId]) return;
+
+        const matchFlags = getBandMatchFlags(bandId);
+        applyFilteredOutClass(chart, matchFlags);
+      }
+
+      function renderBand(bandId) {
+        if (!window[`chart${bandId}`]) return;
+        const source = latestSeriesData[bandId] || [];
+        rawSeriesData[bandId] = source;
+        try {
+          window[`chart${bandId}`].updateSeries(source);
+          syncBandFiltering(bandId);
+        } catch (e) {
+          console.error("Failed to update series", e);
+        }
+      }
+
+      function renderAllBands() {
+        BANDS.forEach(renderBand);
+      }
+
+      function setFrozenButtonState(buttonEl, frozen) {
+        buttonEl.dataset.frozen = frozen ? "true" : "false";
+        buttonEl.textContent = frozen ? "Unfreeze" : "Freeze";
+      }
+
+      function bindBandControls(bandId) {
+        const root = document.getElementById(`controls${bandId}`);
+        if (!root) return;
+
+        const filterInput = root.querySelector('[data-role="filter"]');
+        const freezeButton = root.querySelector('[data-role="freeze"]');
+        const clearButton = root.querySelector('[data-role="clear"]');
+
+        if (filterInput) {
+          filterInput.addEventListener("input", (event) => {
+            bandState[bandId].filterQuery = event.target.value;
+            syncBandFiltering(bandId);
+          });
+        }
+
+        if (freezeButton) {
+          setFrozenButtonState(freezeButton, bandState[bandId].frozen);
+          freezeButton.addEventListener("click", () => {
+            bandState[bandId].frozen = !bandState[bandId].frozen;
+            setFrozenButtonState(freezeButton, bandState[bandId].frozen);
+            if (!bandState[bandId].frozen) {
+              renderBand(bandId);
+            }
+          });
+        }
+
+        if (clearButton) {
+          clearButton.addEventListener("click", () => {
+            bandState[bandId].filterQuery = "";
+            if (filterInput) filterInput.value = "";
+            syncBandFiltering(bandId);
+          });
+        }
+      }
 
       function makeOptions(bandId, bandName, channels) {
         const options = {
@@ -161,6 +368,7 @@
                   //   },
                   // });
                 }
+                applyFilteredOutClass(chart, getBandMatchFlags(bandId));
               },
             },
             toolbar: {
@@ -224,6 +432,9 @@
               toggleDataSeries: false,
             },
             formatter: (seriesName, { seriesIndex, w }) => {
+              if (!rawSeriesData[bandId] || !rawSeriesData[bandId][seriesIndex]) {
+                return seriesName;
+              }
               const yValue = w.config.series[seriesIndex].data[1][1];
               const xValue = rawSeriesData[bandId][seriesIndex].channel;
               let ssid = rawSeriesData[bandId][seriesIndex].ssid;
@@ -347,6 +558,8 @@
       }
 
       window.init = (bands) => {
+        BANDS.forEach((bandId) => bindBandControls(bandId));
+
         const chart24 = window.chart24;
         const chart5 = window.chart5;
         const chart6 = window.chart6;
@@ -396,12 +609,9 @@
 
       window.updateChart = (bandId, series) => {
         if (window[`chart${bandId}`]) {
-          rawSeriesData[bandId] = series;
-          try {
-            window[`chart${bandId}`].updateSeries(series);
-          } catch (e) {
-            console.error("Failed to update series", e);
-          }
+          latestSeriesData[bandId] = series;
+          if (bandState[bandId]?.frozen) return;
+          renderBand(bandId);
         }
       };
     </script>
