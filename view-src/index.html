@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -153,7 +153,9 @@
             type="text"
             placeholder="Search SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="freeze" type="button" data-frozen="false">
+            Freeze
+          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart24"></div>
@@ -165,7 +167,9 @@
             type="text"
             placeholder="Search SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="freeze" type="button" data-frozen="false">
+            Freeze
+          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart5"></div>
@@ -177,7 +181,9 @@
             type="text"
             placeholder="Search SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">Freeze</button>
+          <button data-role="freeze" type="button" data-frozen="false">
+            Freeze
+          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart6"></div>
@@ -193,10 +199,33 @@
       let rawSeriesData = {};
       let latestSeriesData = {};
       let lastZoom = {};
+
+      // Generate a consistent color for an SSID
+      async function getColorForSSID(ssid, ctx) {
+        // Get the color palette from ApexCharts theme
+        const colorPalette = ctx.theme.predefined();
+
+        // Handle null/undefined SSIDs
+        if (ssid === null || ssid === undefined || ssid === "n/a") {
+          return "#888888"; // Gray for unknown networks
+        }
+
+        // Generate a hash from the SSID string
+        const encoder = new TextEncoder();
+        const data = encoder.encode(ssid);
+        const hashBuffer = await crypto.subtle.digest("SHA-1", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hash = hashArray[0]; // Use the first byte of the hash for color indexing
+
+        // Map hash to color palette
+        const colorIndex = hash % colorPalette.length;
+        return colorPalette[colorIndex];
+      }
+
       const bandState = {
-        "24": { filterQuery: "", frozen: false },
-        "5": { filterQuery: "", frozen: false },
-        "6": { filterQuery: "", frozen: false },
+        24: { filterQuery: "", frozen: false },
+        5: { filterQuery: "", frozen: false },
+        6: { filterQuery: "", frozen: false },
       };
 
       const BANDS = ["24", "5", "6"];
@@ -220,7 +249,9 @@
           el.classList.toggle("filtered-out", !matchFlags[index]);
         });
 
-        const legendEls = chart.el.querySelectorAll(".apexcharts-legend-series");
+        const legendEls = chart.el.querySelectorAll(
+          ".apexcharts-legend-series",
+        );
         legendEls.forEach((el, index) => {
           el.classList.toggle("filtered-out", !matchFlags[index]);
         });
@@ -239,20 +270,31 @@
         applyFilteredOutClass(chart, matchFlags);
       }
 
-      function renderBand(bandId) {
-        if (!window[`chart${bandId}`]) return;
+      async function renderBand(bandId) {
+        const chart = window[`chart${bandId}`];
+        if (!chart) return;
+
         const source = latestSeriesData[bandId] || [];
         rawSeriesData[bandId] = source;
+
+        // Apply colors based on SSID
+        const seriesWithColors = await Promise.all(
+          source.map(async (s) => ({
+            ...s,
+            color: await getColorForSSID(s.ssid, chart.ctx),
+          })),
+        );
+
         try {
-          window[`chart${bandId}`].updateSeries(source);
+          window[`chart${bandId}`].updateSeries(seriesWithColors);
           syncBandFiltering(bandId);
         } catch (e) {
           console.error("Failed to update series", e);
         }
       }
 
-      function renderAllBands() {
-        BANDS.forEach(renderBand);
+      async function renderAllBands() {
+        BANDS.forEach(async (...args) => await renderBand(...args));
       }
 
       function setFrozenButtonState(buttonEl, frozen) {
@@ -260,7 +302,7 @@
         buttonEl.textContent = frozen ? "Unfreeze" : "Freeze";
       }
 
-      function bindBandControls(bandId) {
+      async function bindBandControls(bandId) {
         const root = document.getElementById(`controls${bandId}`);
         if (!root) return;
 
@@ -277,11 +319,11 @@
 
         if (freezeButton) {
           setFrozenButtonState(freezeButton, bandState[bandId].frozen);
-          freezeButton.addEventListener("click", () => {
+          freezeButton.addEventListener("click", async () => {
             bandState[bandId].frozen = !bandState[bandId].frozen;
             setFrozenButtonState(freezeButton, bandState[bandId].frozen);
             if (!bandState[bandId].frozen) {
-              renderBand(bandId);
+              await renderBand(bandId);
             }
           });
         }
@@ -432,7 +474,10 @@
               toggleDataSeries: false,
             },
             formatter: (seriesName, { seriesIndex, w }) => {
-              if (!rawSeriesData[bandId] || !rawSeriesData[bandId][seriesIndex]) {
+              if (
+                !rawSeriesData[bandId] ||
+                !rawSeriesData[bandId][seriesIndex]
+              ) {
                 return seriesName;
               }
               const yValue = w.config.series[seriesIndex].data[1][1];
@@ -557,8 +602,8 @@
         return options;
       }
 
-      window.init = (bands) => {
-        BANDS.forEach((bandId) => bindBandControls(bandId));
+      window.init = async (bands) => {
+        BANDS.forEach(async (bandId) => await bindBandControls(bandId));
 
         const chart24 = window.chart24;
         const chart5 = window.chart5;
@@ -607,11 +652,11 @@
         }
       };
 
-      window.updateChart = (bandId, series) => {
+      window.updateChart = async (bandId, series) => {
         if (window[`chart${bandId}`]) {
           latestSeriesData[bandId] = series;
-          if (bandState[bandId]?.frozen) return;
-          renderBand(bandId);
+          if (bandState[bandId].frozen) return;
+          await renderBand(bandId);
         }
       };
     </script>
