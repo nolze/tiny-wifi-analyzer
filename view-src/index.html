@@ -21,15 +21,21 @@
       }
 
       .graph-controls {
+        position: absolute;
+        z-index: 10;
+        border: 1px solid #e1e1e1;
+        border-radius: 4px;
+        padding: 8px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
         gap: 8px;
-        margin: 0 0 12px 0;
+        width: 300px;
       }
 
-      .graph-controls input {
-        flex: 1 1 200px;
+      .graph-controls input[type="text"] {
+        flex: 1 1 auto;
         padding: 5px 10px;
         border: 1px solid #e1e1e1;
         border-radius: 4px;
@@ -41,14 +47,13 @@
         transition: border-color 0.2s ease;
       }
 
-      .graph-controls input:focus {
+      .graph-controls input[type="text"]:focus {
         border-color: #ccc;
       }
 
-      .graph-controls input::placeholder {
+      .graph-controls input[type="text"]::placeholder {
         color: #bbb;
         font-weight: 300;
-        font-style: italic;
       }
 
       .graph-controls button {
@@ -69,16 +74,11 @@
         color: #333;
       }
 
-      .graph-controls button[data-frozen="true"] {
-        background: #f5f5f5;
-        border-color: #d1d1d1;
-        color: #000;
-      }
-
       .apexcharts-series.filtered-out,
-      .apexcharts-legend-series.filtered-out {
+      .apexcharts-legend-series.filtered-out,
+      .apexcharts-datalabels.filtered-out {
         opacity: 0.15;
-        transition: opacity 0.15s ease;
+        /* transition: opacity 0.15s ease; */
       }
 
       .chart-container {
@@ -88,16 +88,16 @@
         margin: 0 auto;
       }
 
-      .chart-container.with-separator {
+      /* .chart-container.with-separator {
         margin-bottom: 16px;
-      }
+      } */
 
-      .chart-container.with-separator::after {
+      /* .chart-container.with-separator::after {
         content: "";
         display: block;
         margin-top: 16px;
         border-bottom: 1px solid #e6e6e6;
-      }
+      } */
 
       .annotation {
         font-family: sans-serif;
@@ -120,8 +120,24 @@
 
       .apexcharts-toolbar-custom-icon {
         padding-top: 2px !important;
+        padding-right: 2px !important;
+        padding-left: 2px !important;
+      }
+
+      .apexcharts-toolbar-custom-icon.expand-button {
+        padding-top: 2px !important;
         padding-right: 4px !important;
         padding-left: 6px !important;
+      }
+
+      .apexcharts-toolbar-custom-icon.freeze-button {
+        padding-top: 5px !important;
+        padding-right: 0px !important;
+        /* padding-left: 6px !important; */
+      }
+
+      .apexcharts-toolbar-custom-icon.filter-button {
+        position: relative;
       }
 
       .chart-container.full-window {
@@ -147,43 +163,49 @@
   <body>
     <div id="charts" style="display: flex; flex-wrap: wrap">
       <div class="chart-container with-separator">
-        <div class="graph-controls" id="controls24" data-band-id="24">
+        <div
+          class="graph-controls"
+          id="controls24"
+          data-band-id="24"
+          style="display: none"
+        >
           <input
             data-role="filter"
             type="text"
-            placeholder="Search SSID or MAC/BSSID"
+            placeholder="Filter by SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">
-            Freeze
-          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart24"></div>
       </div>
       <div class="chart-container with-separator">
-        <div class="graph-controls" id="controls5" data-band-id="5">
+        <div
+          class="graph-controls"
+          id="controls5"
+          data-band-id="5"
+          style="display: none"
+        >
           <input
             data-role="filter"
             type="text"
-            placeholder="Search SSID or MAC/BSSID"
+            placeholder="Filter by SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">
-            Freeze
-          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart5"></div>
       </div>
       <div class="chart-container">
-        <div class="graph-controls" id="controls6" data-band-id="6">
+        <div
+          class="graph-controls"
+          id="controls6"
+          data-band-id="6"
+          style="display: none"
+        >
           <input
             data-role="filter"
             type="text"
-            placeholder="Search SSID or MAC/BSSID"
+            placeholder="Filter by SSID or MAC/BSSID"
           />
-          <button data-role="freeze" type="button" data-frozen="false">
-            Freeze
-          </button>
           <button data-role="clear" type="button">Clear</button>
         </div>
         <div class="chart" id="chart6"></div>
@@ -238,6 +260,19 @@
       function isMatch(bandId, entry) {
         const needle = normalize(bandState[bandId]?.filterQuery);
         if (!needle) return true;
+
+        // Show the filter indicator if there's a filter query
+        if (!needle) {
+          document
+            .getElementById(`chart${bandId}`)
+            .querySelector(".filter-button .indicator").style.display = "none";
+        } else {
+          document
+            .getElementById(`chart${bandId}`)
+            .querySelector(".filter-button .indicator").style.display =
+            "inline";
+        }
+
         const ssid = normalize(entry.ssid);
         const bssid = normalize(entry.name);
         return ssid.includes(needle) || bssid.includes(needle);
@@ -253,6 +288,13 @@
           ".apexcharts-legend-series",
         );
         legendEls.forEach((el, index) => {
+          el.classList.toggle("filtered-out", !matchFlags[index]);
+        });
+
+        const dataLabelEls = chart.el.querySelectorAll(
+          ".apexcharts-datalabels",
+        );
+        dataLabelEls.forEach((el, index) => {
           el.classList.toggle("filtered-out", !matchFlags[index]);
         });
       }
@@ -297,34 +339,17 @@
         BANDS.forEach(async (...args) => await renderBand(...args));
       }
 
-      function setFrozenButtonState(buttonEl, frozen) {
-        buttonEl.dataset.frozen = frozen ? "true" : "false";
-        buttonEl.textContent = frozen ? "Unfreeze" : "Freeze";
-      }
-
       async function bindBandControls(bandId) {
         const root = document.getElementById(`controls${bandId}`);
         if (!root) return;
 
         const filterInput = root.querySelector('[data-role="filter"]');
-        const freezeButton = root.querySelector('[data-role="freeze"]');
         const clearButton = root.querySelector('[data-role="clear"]');
 
         if (filterInput) {
           filterInput.addEventListener("input", (event) => {
             bandState[bandId].filterQuery = event.target.value;
             syncBandFiltering(bandId);
-          });
-        }
-
-        if (freezeButton) {
-          setFrozenButtonState(freezeButton, bandState[bandId].frozen);
-          freezeButton.addEventListener("click", async () => {
-            bandState[bandId].frozen = !bandState[bandId].frozen;
-            setFrozenButtonState(freezeButton, bandState[bandId].frozen);
-            if (!bandState[bandId].frozen) {
-              await renderBand(bandId);
-            }
           });
         }
 
@@ -423,9 +448,85 @@
                   '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M12 16v-2.5q0-.625.438-1.062T13.5 12H16v1.5h-2.5V16zm1.5 6q-.625 0-1.062-.437T12 20.5V18h1.5v2.5H16V22zm7-6v-2.5H18V12h2.5q.625 0 1.063.438T22 13.5V16zM18 22v-1.5h2.5V18H22v2.5q0 .625-.437 1.063T20.5 22zm2.775-12H18.7q-.65-2.2-2.475-3.6T12 5Q9.075 5 7.037 7.038T5 12q0 1.8.813 3.3T8 17.75V15h2v6H4v-2h2.35Q4.8 17.75 3.9 15.938T3 12q0-1.875.713-3.512t1.924-2.85t2.85-1.925T12 3q3.225 0 5.663 1.988T20.775 10"/></svg>',
                 customIcons: [
                   {
+                    icon:
+                      '<svg class="pause" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M16 19q-.825 0-1.412-.587T14 17V7q0-.825.588-1.412T16 5t1.413.588T18 7v10q0 .825-.587 1.413T16 19m-8 0q-.825 0-1.412-.587T6 17V7q0-.825.588-1.412T8 5t1.413.588T10 7v10q0 .825-.587 1.413T8 19"/></svg>' +
+                      '<svg class="resume" style="display: none" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 24 24"><path fill="currentColor" d="M8 17.175V6.825q0-.425.3-.713t.7-.287q.125 0 .263.037t.262.113l8.15 5.175q.225.15.338.375t.112.475t-.112.475t-.338.375l-8.15 5.175q-.125.075-.262.113T9 18.175q-.4 0-.7-.288t-.3-.712"/></svg>',
+                    index: -5,
+                    title: "Pause/Resume",
+                    class: "freeze-button",
+                    click: async (chart, options, e) => {
+                      const el = e.target;
+                      bandState[bandId].frozen = !bandState[bandId].frozen;
+
+                      // Toggle button icons
+                      if (bandState[bandId].frozen) {
+                        el.querySelector(".pause").style.display = "none";
+                        el.querySelector(".resume").style.display = "block";
+                      } else {
+                        el.querySelector(".pause").style.display = "block";
+                        el.querySelector(".resume").style.display = "none";
+                      }
+
+                      if (!bandState[bandId].frozen) {
+                        await renderBand(bandId);
+                      }
+                    },
+                  },
+                  {
+                    icon:
+                      '<svg xmlns="http://www.w3.org/2000/svg" width="22px" height="22px" viewBox="0 0 24 24"><path fill="currentColor" d="M11.77 19q-.33 0-.55-.22t-.22-.55v-5.576L5.604 5.83q-.202-.27-.055-.55t.47-.28h11.962q.323 0 .47.28q.147.282-.055.55L13 12.655v5.577q0 .328-.22.549t-.55.22z"/></svg>' +
+                      '<span class="indicator" style="display:none;position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:100%;background:orange;"></span>',
+                    index: 1,
+                    title: "Filter",
+                    class: "filter-button",
+                    click: async (chart, options, e) => {
+                      const el = e.target;
+                      const root =
+                        chart.el.parentElement.querySelector(".graph-controls");
+                      if (!root) return;
+                      const input = root.querySelector(
+                        "input[data-role='filter']",
+                      );
+                      if (root.style.display === "flex") {
+                        root.style.display = "none";
+                      } else {
+                        // Position the popover below the button
+                        const buttonRect = el.getBoundingClientRect();
+                        const rootRect = root.getBoundingClientRect();
+                        const top = buttonRect.bottom + window.scrollY + 4;
+                        const right =
+                          window.innerWidth -
+                          buttonRect.left -
+                          buttonRect.width / 2 -
+                          rootRect.width / 2;
+                        root.style.top = `${top}px`;
+                        root.style.right = `${right}px`;
+                        root.style.display = "flex";
+
+                        input.focus();
+
+                        // Close the popover when clicking outside of it
+                        const onClickOutside = (event) => {
+                          if (
+                            !root.contains(event.target) &&
+                            event.target !== el
+                          ) {
+                            root.style.display = "none";
+                            document.removeEventListener(
+                              "click",
+                              onClickOutside,
+                            );
+                          }
+                        };
+                        document.addEventListener("click", onClickOutside);
+                      }
+                    },
+                  },
+                  {
                     icon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M20 8V6h-2q-.425 0-.712-.288T17 5t.288-.712T18 4h2q.825 0 1.413.588T22 6v2q0 .425-.288.713T21 9t-.712-.288T20 8M2 8V6q0-.825.588-1.412T4 4h2q.425 0 .713.288T7 5t-.288.713T6 6H4v2q0 .425-.288.713T3 9t-.712-.288T2 8m18 12h-2q-.425 0-.712-.288T17 19t.288-.712T18 18h2v-2q0-.425.288-.712T21 15t.713.288T22 16v2q0 .825-.587 1.413T20 20M4 20q-.825 0-1.412-.587T2 18v-2q0-.425.288-.712T3 15t.713.288T4 16v2h2q.425 0 .713.288T7 19t-.288.713T6 20zm2-6v-4q0-.825.588-1.412T8 8h8q.825 0 1.413.588T18 10v4q0 .825-.587 1.413T16 16H8q-.825 0-1.412-.587T6 14m2 0h8v-4H8zm0 0v-4z"/></svg>',
-                    index: 2,
+                    index: -1,
                     title: "Toggle Expand",
+                    class: "expand-button",
                     click: (chart, options, e) => {
                       const chartEl = chart.el;
                       if (
