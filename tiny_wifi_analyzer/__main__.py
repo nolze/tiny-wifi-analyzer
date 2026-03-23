@@ -30,6 +30,7 @@ logger.addHandler(logging.NullHandler())
 update_queue = queue.Queue()
 is_closing = False
 scanner_thread = None
+scanner_pause_event = threading.Event()
 debug_scan_count = 0
 
 webview.settings["ALLOW_DOWNLOADS"] = True
@@ -122,6 +123,9 @@ def get_supported_bands():
 def start_scanner(interval_ms: int) -> threading.Thread:
     def loop():
         while not is_closing:
+            if scanner_pause_event.is_set():
+                sleep(0.1)
+                continue
             try:
                 name, nws = scan()
                 update_queue.put((name, nws))
@@ -148,6 +152,8 @@ def to_series(nws):
 
 def update(window, supported_bands):
     if is_closing:
+        return
+    if scanner_pause_event.is_set():
         return
 
     try:
@@ -248,6 +254,19 @@ class LocationManagerDelegate(AppKit.NSObject):
             AppKit.NSApplication.sharedApplication().terminate_(None)
 
 
+class Api:
+    def pause_scan(self):
+        scanner_pause_event.set()
+        return {"paused": True}
+
+    def resume_scan(self):
+        scanner_pause_event.clear()
+        return {"paused": False}
+
+    def get_scan_state(self):
+        return {"paused": scanner_pause_event.is_set()}
+
+
 def request_location_permission():
     location_manager = CoreLocation.CLLocationManager.alloc().init().retain()
     delegate = LocationManagerDelegate.alloc().init().retain()
@@ -276,7 +295,7 @@ def main():
     AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
 
     index_html = os.path.join(os.path.dirname(__file__), "view/index.html")
-    window = webview.create_window("Tiny Wi-Fi Analyzer", index_html)
+    window = webview.create_window("Tiny Wi-Fi Analyzer", index_html, js_api=Api())
     window.events.closing += on_closing
     window.events.loaded += setup_client
     webview.start(startup, window, debug=True)
