@@ -13,6 +13,7 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 * Real-time updates of Wi-Fi networks
 * Support for 2.4 GHz, 5 GHz, and 6 GHz Wi‑Fi bands
 * Highlight the chart for the selected SSID
+* Filter networks by SSID and BSSID (MAC address)
 * Export charts as images (PNG, JPEG, or SVG)
 * Export chart data as a CSV file
 
@@ -42,12 +43,14 @@ Please enable Location Services by following the instructions.
 
 * [x] Bundle scripts with Parcel
 * [x] Prepare GitHub Pages
+* [ ] Migrate the frontend to React or else
 
 ## Mentions
 
 - [Bezplatné macOS aplikace, které stojí za pozornost [Free macOS apps worth paying attention to] – Jablíčkář.cz](https://jablickar.cz/bezplatne-macos-aplikace-ktere-stoji-za-pozornost-stredove-tlacitko-prepinani-aplikaci-a-virtualizace/4/)
 - [What are your favourite open-source apps? : r/macapps](https://www.reddit.com/r/macapps/comments/140bl4x/comment/jmx1o5g/)
 - [„Breitbandmessung Desktop“ aktualisiert – „Tiny Wi-Fi Analyzer“ neu › ifun.de](https://www.ifun.de/breitbandmessung-desktop-aktualisiert-tiny-wi-fi-analyzer-neu-248571/)
+- [Tom Dörr (@tom_doerr). Wi-Fi analyzer for macOS with support for 6 GHz bands / X](https://x.com/tom_doerr/status/2023695546439848375)
 
 ## Develop
 
