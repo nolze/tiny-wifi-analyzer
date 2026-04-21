@@ -27,7 +27,7 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 ### Important notes
 
-Because the application is not signed, macOS Gatekeeper may prevent it from opening. You can bypass this using one of the following methods.
+Because the application is not signed, macOS Gatekeeper may prevent it from opening. You can bypass this using one of the following methods. (*Caveat: run only trusted builds.*)
 
 **Method 1: Context Menu**
 1. **Right-click on the app icon**,
