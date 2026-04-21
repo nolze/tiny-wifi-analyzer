@@ -27,12 +27,23 @@ Made with PyObjC, pywebview, ApexCharts, PyInstaller.
 
 ### Important notes
 
-Because the application is not signed, you will need to follow the steps below in order to run the application.
+Because the application is not signed, macOS Gatekeeper may prevent it from opening. You can bypass this using one of the following methods.
 
+**Method 1: Context Menu**
 1. **Right-click on the app icon**,
 2. select "Open" from the context menu, and
 3. select "OK" in the dialog below.\
    <img src="https://user-images.githubusercontent.com/291323/179491872-3a9e6c4c-b8cb-4081-ac88-bd1817d6ba4d.png" width="300px" />
+
+**Method 2: Terminal (If you only see "Move to Bin")**
+If macOS shows an error that it *"could not verify 'Tiny Wi-Fi Analyzer.app' is free of malware"* with no option to open it, you must manually remove the quarantine attribute.
+
+1. Open **Terminal**.
+2. Run the following command (assuming you placed the app in your Applications folder):
+```sh
+   xattr -d com.apple.quarantine /Applications/Tiny\ Wi-Fi\ Analyzer.app
+```
+3. Launch the application normally.
 
 On macOS 14 Sonoma and later, Location Services permission is required to get Wi-Fi SSIDs.
 Please enable Location Services by following the instructions.
